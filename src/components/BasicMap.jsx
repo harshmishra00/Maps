@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import { MapContainer, Marker, TileLayer, Popup, useMap } from 'react-leaflet'
+import L from "leaflet";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+});
+
 
 const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
 
 function BasicMap() {
 
-    const [position, setPosition] = useState([27.57,80.66])
+    const [position, setPosition] = useState([27.57, 80.66])
     const [search, setSearch] = useState("")
     const [weather, setWeather] = useState(null)
 
