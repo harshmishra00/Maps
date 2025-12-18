@@ -76,45 +76,61 @@ function BasicMap() {
 
 
     return (
-        <>
-            <div>
-                <input type="text" placeholder='Search location' onChange={(e) => setSearch(e.target.value)} />
-                <button onClick={handleSearch} >Search</button>
-            </div>
-            {weather?.main && (
-                <div style={{ padding: 10, background: "white" }}>
-                    <h3>Weather</h3>
-                    <p>🌡️ {weather.main.temp} °C</p>
-                    <p>☁️ {weather.weather[0].description}</p>
-                    <p>💨 Wind: {weather.wind.speed} m/s</p>
+        <div className="flex h-screen w-full">
+
+
+            <div className="w-80 p-4 items-center">
+                <div className="flex items-center mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search location"
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-52 border p-2 rounded-s-lg"
+                    />
+
+                    <button
+                        onClick={handleSearch}
+                        className="bg-blue-500 text-white p-2 rounded-e-lg border border-blue-500"
+                    >
+                        Search
+                    </button>
                 </div>
-            )}
 
 
-            <MapContainer
-                center={[27.57, 80.66]}
-                zoom={13}
-                style={{ height: "100vh", width: "100%" }}
-            >
-                <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+                {weather?.main && (
+                    <div>
+                        <h3 className='font-bold text-3xl mb-5'>Weather Details : </h3>
+                       <div className='border-'>
+                         <p><span className='font-semibold text-xl'>Temperature:</span> <span className='text-red-600'>{weather.main.temp}</span> °C</p>
+                       </div>
+                        <p>{weather.weather[0].description}</p>
+                        <p>{weather.wind.speed} m/s</p>
+                    </div>
+                )}
+            </div>
 
-                <FlyToLocation position={position} />
 
-                {
-                    position && (
-                        <Marker position={position} >
+            <div className="flex-1">
+                <MapContainer
+                    center={[27.57, 80.66]}
+                    zoom={13}
+                    className="h-full w-full"
+                >
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+                    <FlyToLocation position={position} />
+
+                    {position && (
+                        <Marker position={position}>
                             <Popup>You are here</Popup>
                         </Marker>
-                    )
-                }
+                    )}
+                </MapContainer>
+            </div>
 
+        </div>
+    );
 
-
-            </MapContainer>
-        </>
-    )
 }
 
 export default BasicMap
