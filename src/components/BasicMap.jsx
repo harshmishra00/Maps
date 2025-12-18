@@ -5,6 +5,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
+
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -76,41 +77,69 @@ function BasicMap() {
 
 
     return (
-        <div className="flex h-screen w-full">
+        <div className="flex h-screen w-full bg-gray-100">
 
 
-            <div className="w-80 p-4 items-center">
-                <div className="flex items-center mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search location"
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-52 border p-2 rounded-s-lg"
-                    />
+            <aside className="w-80 bg-white shadow-lg flex flex-col">
 
-                    <button
-                        onClick={handleSearch}
-                        className="bg-blue-500 text-white p-2 rounded-e-lg border border-blue-500"
-                    >
-                        Search
-                    </button>
+
+                <div className="px-6 py-4 border-b">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                        Location Search
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                        Search places & view weather
+                    </p>
+                </div>
+
+
+                <div className="px-6 py-4">
+                    <div className="flex">
+                        <input
+                            type="text"
+                            placeholder="Enter city or place"
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="flex-1 rounded-l-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            className="rounded-r-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+                        >
+                            Search
+                        </button>
+                    </div>
                 </div>
 
 
                 {weather?.main && (
-                    <div>
-                        <h3 className='font-bold text-3xl mb-5'>Weather Details : </h3>
-                       <div className='border-'>
-                         <p><span className='font-semibold text-xl'>Temperature:</span> <span className='text-red-600'>{weather.main.temp}</span> °C</p>
-                       </div>
-                        <p>{weather.weather[0].description}</p>
-                        <p>{weather.wind.speed} m/s</p>
+                    <div className="px-6 py-4 space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                            Weather Overview :
+                        </h3>
+
+                        <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 p-5 text-white shadow">
+                            <div className="text-4xl font-bold">
+                                {weather.main.temp}°C
+                            </div>
+                            <p className="mt-1 text-sm capitalize opacity-90">
+                                {weather.weather[0].description}
+                            </p>
+
+                            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                                <p>Feels like: {weather.main.feels_like}°</p>
+                                <p>Humidity: {weather.main.humidity}%</p>
+                                <p>Min: {weather.main.temp_min}°</p>
+                                <p>Max: {weather.main.temp_max}°</p>
+                            </div>
+                        </div>
                     </div>
                 )}
-            </div>
+            </aside>
 
 
-            <div className="flex-1">
+            <main className="relative flex-1">
+
+
                 <MapContainer
                     center={[27.57, 80.66]}
                     zoom={13}
@@ -126,10 +155,11 @@ function BasicMap() {
                         </Marker>
                     )}
                 </MapContainer>
-            </div>
 
+            </main>
         </div>
     );
+
 
 }
 
