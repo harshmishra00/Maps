@@ -59,6 +59,7 @@ function MapClickHandler({ setPosition, addToHistory }) {
 
 function BasicMap() {
     const [position, setPosition] = useState(null);
+    const [satellite, setSatellite] = useState(true);
     const [search, setSearch] = useState("");
     const [weather, setWeather] = useState(null);
     const [description, setDescription] = useState("");
@@ -206,12 +207,18 @@ function BasicMap() {
             <div className="flex h-screen w-full flex-col md:flex-row">
 
                 <aside className="order-2 flex h-[45vh] w-full flex-col overflow-y-auto bg-gray-100 border-r md:order-1 md:h-full md:w-[360px]">
-                    <div className="sticky top-0 z-10 border-b bg-white px-6 py-4">
+                    <div className="sticky top-0 z-10 border-b bg-white px-6 py-4 flex flex-col gap-2">
                         <button
                             onClick={getUserLocation}
                             className="w-full rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:from-green-700 hover:to-emerald-700"
                         >
                             📍 Use My Current Location
+                        </button>
+                        <button
+                            onClick={() => setSatellite(!satellite)}
+                            className="w-full rounded-lg bg-gray-800 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-gray-900"
+                        >
+                            {satellite ? "🗺️ Show Map View" : "🛰️ Show Satellite View"}
                         </button>
                     </div>
 
@@ -299,7 +306,14 @@ function BasicMap() {
                 <main className="order-1 relative h-[55vh] flex-1 md:order-2 md:h-full">
 
                     <MapContainer center={[20, 0]} zoom={2} className="h-full w-full">
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        {satellite ? (
+                            <TileLayer
+                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+                            />
+                        ) : (
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        )}
 
                         <MapClickHandler
                             setPosition={setPosition}
