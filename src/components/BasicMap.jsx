@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, Marker, TileLayer, Popup, useMap } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, Popup, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -31,20 +31,31 @@ function FlyToLocation({ position }) {
     return null;
 }
 
+function MapClickHandler({ setPosition }) {
+    useMapEvents({
+        click(e) {
+            console.log("Map clicked:", e.latlng);
+            setPosition([e.latlng.lat, e.latlng.lng]);
+        },
+    });
+
+    return null;
+}
+
 function BasicMap() {
     const [position, setPosition] = useState(null);
     const [search, setSearch] = useState("");
     const [weather, setWeather] = useState(null);
     const [description, setDescription] = useState("");
 
-    /* Manual location fetch */
+
     function getUserLocation() {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 setPosition([pos.coords.latitude, pos.coords.longitude]);
             },
             () => {
-                
+
             },
             {
                 enableHighAccuracy: true,
@@ -203,6 +214,8 @@ function BasicMap() {
                     className="h-full w-full"
                 >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+                    <MapClickHandler setPosition={setPosition} />
 
                     <FlyToLocation position={position} />
 
