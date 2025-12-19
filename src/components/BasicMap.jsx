@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, Marker, TileLayer, Popup, useMap, useMapEvents } from "react-leaflet";
+import {
+    MapContainer,
+    Marker,
+    TileLayer,
+    Popup,
+    useMap,
+    useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -16,6 +22,7 @@ L.Icon.Default.mergeOptions({
 const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
 
+
 function FlyToLocation({ position }) {
     const map = useMap();
 
@@ -23,7 +30,7 @@ function FlyToLocation({ position }) {
         if (position) {
             map.flyTo(position, 13, {
                 animate: true,
-                duration: 2.5,
+                duration: 2,
             });
         }
     }, [position, map]);
@@ -31,32 +38,58 @@ function FlyToLocation({ position }) {
     return null;
 }
 
-function MapClickHandler({ setPosition }) {
+function MapClickHandler({ setPosition, addToHistory }) {
     useMapEvents({
         click(e) {
-            console.log("Map clicked:", e.latlng);
-            setPosition([e.latlng.lat, e.latlng.lng]);
+            const { lat, lng } = e.latlng;
+            setPosition([lat, lng]);
+            addToHistory(lat, lng, "Map click");
         },
     });
 
     return null;
 }
 
+
+
 function BasicMap() {
     const [position, setPosition] = useState(null);
     const [search, setSearch] = useState("");
     const [weather, setWeather] = useState(null);
     const [description, setDescription] = useState("");
+    const [history, setHistory] = useState([]);
+
+
+
+    function addToHistory(lat, lon, label = "Selected place") {
+        const entry = {
+            id: Date.now(),
+            lat,
+            lon,
+            label,
+            time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            }),
+        };
+
+        setHistory((prev) => {
+            const updated = [entry, ...prev];
+            return updated.slice(0, 3);
+        });
+    }
+
 
 
     function getUserLocation() {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                setPosition([pos.coords.latitude, pos.coords.longitude]);
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                setPosition([lat, lon]);
+                addToHistory(lat, lon, "My location");
             },
-            () => {
-
-            },
+            () => { },
             {
                 enableHighAccuracy: true,
                 timeout: 10000,
@@ -64,6 +97,7 @@ function BasicMap() {
             }
         );
     }
+
 
 
     useEffect(() => {
@@ -78,19 +112,26 @@ function BasicMap() {
     }, [position]);
 
 
+
     function handleSearch() {
         if (!search) return;
 
         fetch(
-            `https://nominatim.openstreetmap.org/search?q=${search}&format=json`
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+                search
+            )}&format=json`
         )
             .then((res) => res.json())
             .then((data) => {
                 if (data.length > 0) {
-                    setPosition([data[0].lat, data[0].lon]);
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    setPosition([lat, lon]);
+                    addToHistory(lat, lon, data[0].display_name.split(",")[0]);
                 }
             });
     }
+
 
 
     useEffect(() => {
@@ -126,18 +167,18 @@ function BasicMap() {
             .catch(() => setDescription(""));
     }, [position]);
 
+
+
     return (
         <div className="flex h-screen w-full bg-gray-100">
 
             <aside className="w-[360px] bg-white border-r flex flex-col overflow-y-auto">
-
-                <div className="sticky top-0 z-10 bg-white border-b px-6 py-4">
+                <div className="sticky top-0 bg-white border-b px-6 py-4 z-10">
                     <button
                         onClick={getUserLocation}
-                        className="w-full rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 
-                       px-4 py-3 text-sm font-semibold text-white 
-                       hover:from-green-700 hover:to-emerald-700 
-                       transition shadow-md"
+                        className="w-full rounded-lg bg-gradient-to-r from-green-600 to-emerald-600
+                       px-4 py-3 text-sm font-semibold text-white shadow-md
+                       hover:from-green-700 hover:to-emerald-700 transition"
                     >
                         📍 Use My Current Location
                     </button>
@@ -154,18 +195,43 @@ function BasicMap() {
                             type="text"
                             placeholder="City, place, landmark..."
                             onChange={(e) => setSearch(e.target.value)}
-                            className="flex-1 rounded-l-lg border border-gray-300 px-4 py-2 text-sm 
+                            className="flex-1 rounded-l-lg border px-4 py-2 text-sm
                          focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <button
                             onClick={handleSearch}
-                            className="rounded-r-lg bg-blue-600 px-5 py-2 text-sm font-semibold 
-                         text-white hover:bg-blue-700 transition"
+                            className="rounded-r-lg bg-blue-600 px-5 py-2 text-sm
+                         font-semibold text-white hover:bg-blue-700 transition"
                         >
                             Search
                         </button>
                     </div>
                 </div>
+
+
+                {history.length > 0 && (
+                    <div className="px-6 py-4 border-t">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">
+                            Recent Locations
+                        </h3>
+
+                        <ul className="space-y-2">
+                            {history.map((item) => (
+                                <li
+                                    key={item.id}
+                                    onClick={() => setPosition([item.lat, item.lon])}
+                                    className="cursor-pointer rounded-lg border px-3 py-2
+                             hover:bg-gray-100 transition"
+                                >
+                                    <div className="font-medium text-gray-800 truncate">
+                                        {item.label}
+                                    </div>
+                                    <div className="text-xs text-gray-500">{item.time}</div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
 
                 {weather?.main && (
@@ -174,15 +240,14 @@ function BasicMap() {
                             Weather Overview
                         </h3>
 
-                        <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 
-                            p-6 text-white shadow-lg">
+                        <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white shadow-lg">
                             <div className="text-5xl font-bold">
                                 {weather.main.temp}°
                             </div>
+
                             <p className="mt-1 text-sm capitalize opacity-90">
                                 {weather.weather[0].description}
                             </p>
-                            
 
                             <div className="mt-5 grid grid-cols-2 gap-3 text-sm opacity-90">
                                 <p>Feels: {weather.main.feels_like}°</p>
@@ -193,6 +258,7 @@ function BasicMap() {
                         </div>
                     </div>
                 )}
+
 
 
                 {description && (
@@ -209,20 +275,19 @@ function BasicMap() {
 
 
             <main className="flex-1 relative">
-                <MapContainer
-                    center={[20, 0]}
-                    zoom={2}
-                    className="h-full w-full"
-                >
+                <MapContainer center={[20, 0]} zoom={2} className="h-full w-full">
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-                    <MapClickHandler setPosition={setPosition} />
+                    <MapClickHandler
+                        setPosition={setPosition}
+                        addToHistory={addToHistory}
+                    />
 
                     <FlyToLocation position={position} />
 
                     {position && (
                         <Marker position={position}>
-                            <Popup>You are here</Popup>
+                            <Popup>Selected location</Popup>
                         </Marker>
                     )}
                 </MapContainer>
