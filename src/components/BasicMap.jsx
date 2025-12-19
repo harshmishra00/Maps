@@ -5,7 +5,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-/* Leaflet marker fix for Vite */
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: markerIcon2x,
@@ -128,9 +128,9 @@ function BasicMap() {
 
     return (
         <div className="flex h-screen w-full bg-gray-100">
-            {/* SIDEBAR */}
+
             <aside className="w-[360px] bg-white border-r flex flex-col overflow-y-auto">
-                {/* Location Button */}
+
                 <div className="sticky top-0 z-10 bg-white border-b px-6 py-4">
                     <button
                         onClick={getUserLocation}
@@ -143,7 +143,7 @@ function BasicMap() {
                     </button>
                 </div>
 
-                {/* Search */}
+
                 <div className="px-6 py-4 space-y-2">
                     <label className="text-xs font-semibold text-gray-500 uppercase">
                         Search Location
@@ -167,7 +167,7 @@ function BasicMap() {
                     </div>
                 </div>
 
-                {/* Weather */}
+
                 {weather?.main && (
                     <div className="px-6 py-4">
                         <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">
@@ -182,6 +182,7 @@ function BasicMap() {
                             <p className="mt-1 text-sm capitalize opacity-90">
                                 {weather.weather[0].description}
                             </p>
+                            
 
                             <div className="mt-5 grid grid-cols-2 gap-3 text-sm opacity-90">
                                 <p>Feels: {weather.main.feels_like}°</p>
@@ -193,7 +194,7 @@ function BasicMap() {
                     </div>
                 )}
 
-                {/* Description */}
+
                 {description && (
                     <div className="px-6 py-4">
                         <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">
@@ -206,7 +207,7 @@ function BasicMap() {
                 )}
             </aside>
 
-            {/* MAP */}
+
             <main className="flex-1 relative">
                 <MapContainer
                     center={[20, 0]}
